@@ -1,0 +1,60 @@
+// User information
+Table UserInfo {
+    public_address string [primary key]
+    name string
+    address object
+    email string
+}
+
+Table UserAddress {
+    title string [unique, ref: > UserInfo.address]
+    postal_code int
+    country_code string
+    street_address string
+
+}
+
+// Product information
+Table Product {
+    id uuid [primary key]
+    name string
+    price float
+    description string
+    image string
+    soft_deleted int
+}
+
+Table Order {
+    id uuid [primary key]
+    product_ids Product [ref: <> Product.id]
+    amount int
+    from string [ref: > UserInfo.public_address]
+    send_to string [ref: - UserInfo.address]
+}
+
+Table Payment {
+    id uuid [primary key]
+    order_id uuid [ref: - Order.id]
+    token string
+    tx_hash string
+    status string
+}
+
+Table Shippment {
+    id uuid [primary key]
+    order_id uuid [ref: - Order.id]
+    address string [ref: - Order.send_to]
+    ship_receipt string
+    status string
+}
+
+TableGroup User {
+    UserInfo
+    UserAddress
+}
+
+TableGroup OrderInfo {
+    Order
+    Payment
+    Shippment
+}
