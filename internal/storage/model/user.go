@@ -3,6 +3,7 @@ package model
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/0x726f6f6b6965/web3-ecommerce/internal/storage"
 	"github.com/0x726f6f6b6965/web3-ecommerce/protos"
@@ -38,6 +39,7 @@ func GetUserInfo(ctx context.Context, client *storage.DaoClient, publicAddress s
 	if err := attributevalue.UnmarshalMap(data.Item, info); err != nil {
 		return info, err
 	}
+	info.PublicAddress = strings.TrimPrefix(info.PublicAddress, fmt.Sprintf(storage.UserKey, ""))
 
 	return info, nil
 }
@@ -108,6 +110,7 @@ func UpdateUserInfo(ctx context.Context, client *storage.DaoClient, publicAddres
 	if err != nil {
 		return newInfo, err
 	}
+	newInfo.PublicAddress = strings.TrimPrefix(newInfo.PublicAddress, fmt.Sprintf(storage.UserKey, ""))
 
 	return newInfo, nil
 }

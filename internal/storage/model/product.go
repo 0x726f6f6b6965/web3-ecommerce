@@ -3,6 +3,7 @@ package model
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/0x726f6f6b6965/web3-ecommerce/internal/storage"
 
@@ -40,6 +41,7 @@ func GetProduct(ctx context.Context, client *storage.DaoClient, id string) (*pro
 	if err := attributevalue.UnmarshalMap(data.Item, info); err != nil {
 		return info, err
 	}
+	info.Id = strings.TrimPrefix(info.Id, fmt.Sprintf(storage.ProductKey, ""))
 
 	return info, nil
 }
@@ -52,6 +54,9 @@ func PutProduct(ctx context.Context, client *storage.DaoClient, data protos.Prod
 	item, err := attributevalue.MarshalMap(data)
 	if err != nil {
 		return err
+	}
+	item[storage.Pk] = &types.AttributeValueMemberS{
+		Value: fmt.Sprintf(storage.ProductKey, data.Id),
 	}
 	item[storage.Sk] = &types.AttributeValueMemberS{
 		Value: fmt.Sprintf(storage.ProfileKey, data.Id),
@@ -93,7 +98,7 @@ func UpdateProduct(ctx context.Context, client *storage.DaoClient, id string, in
 	if err != nil {
 		return newInfo, err
 	}
-
+	newInfo.Id = strings.TrimPrefix(newInfo.Id, fmt.Sprintf(storage.ProductKey, ""))
 	return newInfo, nil
 }
 
@@ -127,6 +132,10 @@ func GetAllProducts(ctx context.Context, client *storage.DaoClient) ([]*protos.P
 		err = attributevalue.UnmarshalListOfMaps(response.Items, &itemPage)
 		if err != nil {
 			break
+		}
+		for _, item := range itemPage {
+			item.Id = strings.TrimPrefix(item.Id, fmt.Sprintf(storage.ProductKey, ""))
+			items = append(items, item)
 		}
 		items = append(items, itemPage...)
 	}

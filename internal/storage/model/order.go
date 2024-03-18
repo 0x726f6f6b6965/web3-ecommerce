@@ -3,6 +3,8 @@ package model
 import (
 	"context"
 	"fmt"
+	"strings"
+	"time"
 
 	"github.com/0x726f6f6b6965/web3-ecommerce/internal/storage"
 	"github.com/0x726f6f6b6965/web3-ecommerce/protos"
@@ -52,7 +54,11 @@ func GetUserOrders(ctx context.Context, client *storage.DaoClient, publicAddress
 		if err != nil {
 			break
 		}
-		orders = append(orders, orderPage...)
+		for _, order := range orderPage {
+			order.Id = strings.TrimPrefix(order.Id, fmt.Sprintf(storage.OrderKey, ""))
+			order.From = strings.TrimPrefix(order.From, fmt.Sprintf(storage.UserKey, ""))
+			orders = append(orders, order)
+		}
 	}
 	return orders, err
 }
@@ -64,6 +70,12 @@ func PutOrder(ctx context.Context, client *storage.DaoClient, order protos.Order
 	item, err := attributevalue.MarshalMap(order)
 	if err != nil {
 		return err
+	}
+	item[storage.Pk] = &types.AttributeValueMemberS{
+		Value: fmt.Sprintf(storage.UserKey, order.From),
+	}
+	item[storage.Sk] = &types.AttributeValueMemberS{
+		Value: fmt.Sprintf(storage.OrderKey, order.Id),
 	}
 
 	_, err = client.DynamoClient.PutItem(ctx, &dynamodb.PutItemInput{
@@ -90,8 +102,12 @@ func GetOrder(ctx context.Context, client *storage.DaoClient, publicAddress stri
 	if response.Item == nil {
 		return order, nil
 	}
-	err = attributevalue.UnmarshalMap(response.Item, &order)
-	return order, err
+	if err = attributevalue.UnmarshalMap(response.Item, &order); err != nil {
+		return order, err
+	}
+	order.Id = strings.TrimPrefix(order.Id, fmt.Sprintf(storage.OrderKey, ""))
+	order.From = strings.TrimPrefix(order.From, fmt.Sprintf(storage.UserKey, ""))
+	return order, nil
 }
 
 // UpdateOrder - update order.
@@ -122,6 +138,52 @@ func UpdateOrder(ctx context.Context, client *storage.DaoClient, publicAddress, 
 	if err != nil {
 		return newInfo, err
 	}
-
+	newInfo.Id = strings.TrimPrefix(newInfo.Id, fmt.Sprintf(storage.OrderKey, ""))
+	newInfo.From = strings.TrimPrefix(newInfo.From, fmt.Sprintf(storage.UserKey, ""))
 	return newInfo, nil
+}
+
+// GetUserOrdersByStatusAndDate -  get user-orders by status and date
+// LSI: filter_order_status
+// PK: USER#<public address>
+// order_status_date: >= <status>#<date>
+func GetUserOrdersByStatusAndDate(ctx context.Context, client *storage.DaoClient, publicAddress, status string, start time.Time) ([]protos.Order, error) {
+	var (
+		response *dynamodb.QueryOutput
+		orders   []protos.Order
+	)
+
+	keyEx := expression.KeyAnd(
+		expression.Key(storage.Pk).Equal(expression.Value(fmt.Sprintf(storage.UserKey, publicAddress))),
+		expression.KeyGreaterThanEqual(expression.Key(storage.OrderStatusDate),
+			expression.Value(fmt.Sprintf("%s#%d", status, start.Unix()))))
+	expr, err := expression.NewBuilder().WithKeyCondition(keyEx).Build()
+	if err != nil {
+		return orders, err
+	}
+	queryPaginator := dynamodb.NewQueryPaginator(client.DynamoClient, &dynamodb.QueryInput{
+		TableName:                 aws.String(client.Table),
+		ExpressionAttributeNames:  expr.Names(),
+		ExpressionAttributeValues: expr.Values(),
+		KeyConditionExpression:    expr.KeyCondition(),
+		IndexName:                 aws.String(storage.FilterOrderStatus),
+	})
+
+	for queryPaginator.HasMorePages() {
+		response, err = queryPaginator.NextPage(ctx)
+		if err != nil {
+			break
+		}
+		var orderPage []protos.Order
+		err = attributevalue.UnmarshalListOfMaps(response.Items, &orderPage)
+		if err != nil {
+			break
+		}
+		for _, order := range orderPage {
+			order.Id = strings.TrimPrefix(order.Id, fmt.Sprintf(storage.OrderKey, ""))
+			order.From = strings.TrimPrefix(order.From, fmt.Sprintf(storage.UserKey, ""))
+			orders = append(orders, order)
+		}
+	}
+	return orders, err
 }
