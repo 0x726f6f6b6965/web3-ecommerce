@@ -99,14 +99,14 @@ func (o *orderApi) CreateOrder(ctx *gin.Context) {
 		return
 	}
 	var total float64
-	for _, productId := range order.ProductIds {
-		product, err := o.product.GetProduct(ctx, productId)
+	for _, product := range order.ProductIds {
+		info, err := o.product.GetProduct(ctx, product.Id)
 		if err != nil {
 			utils.InternalServerError.Message = fmt.Sprintf("Operation failed, %s.", err.Error())
 			utils.Response(ctx, utils.SuccessCode, utils.InternalServerError, nil)
 			return
 		}
-		total += product.Price
+		total += (info.Price * float64(product.Quantity))
 	}
 	if total != order.Amount {
 		utils.InvalidParamErr.Message = "Please enter correct total."
