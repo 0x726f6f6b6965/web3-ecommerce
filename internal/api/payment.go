@@ -20,10 +20,11 @@ type paymentApi struct {
 }
 
 func NewPaymentApi(serv erc20.ERC20Service, client *ethclient.Client) *paymentApi {
-	return &paymentApi{
+	PaymentApi = &paymentApi{
 		srv:    services.NewPaymentService(serv, client),
 		client: client,
 	}
+	return PaymentApi
 }
 
 func (p *paymentApi) Pay(ctx *gin.Context) {

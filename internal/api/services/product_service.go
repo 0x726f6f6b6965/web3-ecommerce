@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"time"
 
 	"github.com/0x726f6f6b6965/web3-ecommerce/internal/storage"
 	"github.com/0x726f6f6b6965/web3-ecommerce/internal/storage/model"
@@ -39,6 +40,8 @@ func (p *productService) CreateProduct(ctx context.Context, product *protos.Prod
 		return nil, ErrDynamodbClientNotFound
 	}
 	product.Id = uuid.NewString()
+	product.CreatedAt = time.Now().Unix()
+	product.UpdatedAt = time.Now().Unix()
 	err := model.PutProduct(ctx, dynamo, *product)
 	if err != nil {
 		return nil, err

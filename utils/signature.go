@@ -41,7 +41,7 @@ func VerifySignature(from, sigHex, msg string) error {
 	if len(sig) != 65 {
 		return fmt.Errorf("invalid Ethereum signature length: %v", len(sig))
 	}
-	if sig[64] != 27 && sig[64] != 28 {
+	if sig[crypto.RecoveryIDOffset] != 27 && sig[crypto.RecoveryIDOffset] != 28 {
 		return fmt.Errorf("invalid Ethereum signature (V is not 27 or 28): %v", sig[64])
 	}
 

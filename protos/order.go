@@ -6,12 +6,12 @@ type Order struct {
 	ProductIds   []string `json:"product_ids"`
 	Address      string   `json:"address" dynamodbav:"address"`
 	Amount       float64  `json:"amount" dynamodbav:"amount"`
-	Status       string   `json:"status" dynamodbav:"status"`
-	Token        string   `json:"token,omPRODUCTpty" dynamodbav:"token,omPRODUCTpty"`
-	PaymentHash  string   `json:"payment_hash,omPRODUCTpty" dynamodbav:"payment_hash,omPRODUCTpty"`
-	ShipmentHash string   `json:"shipment_hash,omPRODUCTpty" dynamodbav:"shipment_hash,omPRODUCTpty"`
+	Status       Status   `json:"status" dynamodbav:"status"`
+	Token        string   `json:"token,omitempty" dynamodbav:"token,omitempty"`
+	PaymentHash  string   `json:"payment_hash,omitempty" dynamodbav:"payment_hash,omitempty"`
+	ShipmentHash string   `json:"shipment_hash,omitempty" dynamodbav:"shipment_hash,omitempty"`
 
-	StatusCreatedAt string `dynamodbav:"status_created_at,omPRODUCTpty"`
+	StatusCreatedAt string `dynamodbav:"status_created_at,omitempty"`
 	CreatedAt       int64  `dynamodbav:"created_at" json:"created_at"`
 	UpdatedAt       int64  `dynamodbav:"updated_at" json:"updated_at"`
 }

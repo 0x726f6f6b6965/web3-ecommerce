@@ -43,7 +43,8 @@ func (s *userService) GetToken(ctx context.Context, publicAddress string, signat
 	if err != nil {
 		return "", errors.Join(erc20.ErrEthClient, err)
 	}
-	err = utils.VerifySignature(publicAddress, signature, fmt.Sprintf(LoginMsg, publicAddress, nonce))
+	msg := fmt.Sprintf(LoginMsg, publicAddress, nonce)
+	err = utils.VerifySignature(publicAddress, signature, msg)
 	if err != nil {
 		return "", errors.Join(ErrInvalidSignature, err)
 	}
@@ -84,7 +85,8 @@ func (s *userService) CreateUser(ctx context.Context, user *protos.User) error {
 	if dynamo == nil {
 		return ErrDynamodbClientNotFound
 	}
-
+	user.CreatedAt = time.Now().Unix()
+	user.UpdatedAt = time.Now().Unix()
 	err := model.PutUserInfo(ctx, dynamo, *user)
 	if err != nil {
 		return err

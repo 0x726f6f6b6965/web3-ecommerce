@@ -2,6 +2,7 @@ package helper
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -70,7 +71,7 @@ func ExtractTokenMetadata(r *http.Request) (*protos.UserToken, error) {
 		// set user for the token
 		address := claims["user"].(string)
 		// set nonce for the token
-		nonce := claims["nonce"].(string)
+		nonce := claims["nonce"].(float64)
 		// set created at for the token
 		createdAt := int64(claims["created_at"].(float64))
 		if !utils.IsValidAddress(address) {
@@ -81,7 +82,7 @@ func ExtractTokenMetadata(r *http.Request) (*protos.UserToken, error) {
 		return &protos.UserToken{
 			ExpireAt:      expires,
 			PublicAddress: address,
-			Nonce:         nonce,
+			Nonce:         fmt.Sprintf("%f", nonce),
 			CreatedAt:     createdAt,
 		}, nil
 	}

@@ -140,7 +140,7 @@ func (o *orderApi) CancelOrder(ctx *gin.Context) {
 
 	order := new(protos.Order)
 	order.Id = orderId
-	order.Status = protos.StatusCancelled.String()
+	order.Status = protos.StatusCancelled
 	order.From = token.PublicAddress
 	order.UpdatedAt = time.Now().Unix()
 	mask := []string{"updated_at", "status"}
@@ -174,7 +174,7 @@ func (o *orderApi) UpdateOrderStatus(ctx *gin.Context) {
 
 	order := new(protos.Order)
 	order.Id = param.OrderId
-	order.Status = param.Status.String()
+	order.Status = param.Status
 	order.UpdatedAt = time.Now().Unix()
 	mask := []string{"updated_at", "status"}
 	if err := o.srv.UpdateOrder(ctx, token.PublicAddress, param.OrderId, order, mask); err != nil {

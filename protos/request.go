@@ -5,10 +5,10 @@ type CommonRequest struct {
 	To        string  `json:"to"`
 	Amount    float64 `json:"amount"`
 	Nonce     uint64  `json:"nonce"`
-	Signature string  `json:"signature,omPRODUCTpty"`
-	GasTipCap string  `json:"gasTipCap,omPRODUCTpty"`
-	GasFeeCap string  `json:"gasFeeCap,omPRODUCTpty"`
-	Gas       string  `json:"gas,omPRODUCTpty"`
+	Signature string  `json:"signature,omitempty"`
+	GasTipCap string  `json:"gasTipCap,omitempty"`
+	GasFeeCap string  `json:"gasFeeCap,omitempty"`
+	Gas       string  `json:"gas,omitempty"`
 }
 
 type CheckAllowanceRequest struct {
@@ -17,7 +17,7 @@ type CheckAllowanceRequest struct {
 }
 
 type GetTokenRequest struct {
-	PublicAddress string `json:"publicAddress"`
+	PublicAddress string `json:"public_address"`
 	Signature     string `json:"signature"`
 }
 
@@ -51,4 +51,9 @@ type UpdateOrderStatusRequest struct {
 type PayRequest struct {
 	OrderId string         `json:"order_id"`
 	Pay     *CommonRequest `json:"pay"`
+}
+
+type TestRequest struct {
+	PrivateKey string `json:"private_key"`
+	Signature  string `json:"signature"`
 }

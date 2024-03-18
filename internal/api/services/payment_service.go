@@ -49,12 +49,12 @@ func (p *payment) PayToken(ctx context.Context, publicAddress, orderId string, n
 		return "", erc20.ErrInvalidNonce
 	}
 
-	if order.Status == protos.StatusCreated.String() || order.Status == protos.StatusPaidFailed.String() {
+	if order.Status == protos.StatusCreated || order.Status == protos.StatusPaidFailed {
 		tx, err := p.token.TransferWithSign(ctx, *in)
 		if err != nil {
 			return "", errors.Join(ErrTransactionFailed, err)
 		}
-		order.Status = protos.StatusPending.String()
+		order.Status = protos.StatusPending
 		order.PaymentHash = tx.Hash().Hex()
 		order.UpdatedAt = time.Now().Unix()
 		_, err = model.UpdateOrder(ctx, dynamo,

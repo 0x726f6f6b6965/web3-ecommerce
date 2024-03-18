@@ -37,7 +37,7 @@ func (s *orderService) CreateOrder(ctx context.Context, order *protos.Order) (*p
 
 	id := uuid.NewString()
 	order.Id = id
-	order.Status = protos.StatusCreated.String()
+	order.Status = protos.StatusCreated
 	order.CreatedAt = time.Now().Unix()
 	order.UpdatedAt = time.Now().Unix()
 	order.StatusCreatedAt = fmt.Sprintf("%s#%d", order.Status, order.CreatedAt)
