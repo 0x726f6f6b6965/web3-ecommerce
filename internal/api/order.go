@@ -137,13 +137,19 @@ func (o *orderApi) CancelOrder(ctx *gin.Context) {
 		utils.Response(ctx, utils.SuccessCode, utils.InvalidParamErr, nil)
 		return
 	}
+	order, err := o.srv.GetOrder(ctx, token.PublicAddress, orderId)
+	if err != nil {
+		utils.InternalServerError.Message = fmt.Sprintf("Operation failed, %s.", err.Error())
+		utils.Response(ctx, utils.SuccessCode, utils.InternalServerError, nil)
+		return
+	}
 
-	order := new(protos.Order)
 	order.Id = orderId
 	order.Status = protos.StatusCancelled
 	order.From = token.PublicAddress
 	order.UpdatedAt = time.Now().Unix()
-	mask := []string{"updated_at", "status"}
+	order.StatusCreatedAt = fmt.Sprintf("%s#%d", protos.StatusCancelled.String(), order.CreatedAt)
+	mask := []string{"updated_at", "status", "status_created_at"}
 	if err := o.srv.UpdateOrder(ctx, token.PublicAddress, orderId, order, mask); err != nil {
 		utils.InternalServerError.Message = fmt.Sprintf("Operation failed, %s.", err.Error())
 		utils.Response(ctx, utils.SuccessCode, utils.InternalServerError, nil)
@@ -172,11 +178,17 @@ func (o *orderApi) UpdateOrderStatus(ctx *gin.Context) {
 		return
 	}
 
-	order := new(protos.Order)
+	order, err := o.srv.GetOrder(ctx, token.PublicAddress, param.OrderId)
+	if err != nil {
+		utils.InternalServerError.Message = fmt.Sprintf("Operation failed, %s.", err.Error())
+		utils.Response(ctx, utils.SuccessCode, utils.InternalServerError, nil)
+		return
+	}
 	order.Id = param.OrderId
 	order.Status = param.Status
 	order.UpdatedAt = time.Now().Unix()
-	mask := []string{"updated_at", "status"}
+	order.StatusCreatedAt = fmt.Sprintf("%s#%d", param.Status.String(), order.CreatedAt)
+	mask := []string{"updated_at", "status", "status_created_at"}
 	if err := o.srv.UpdateOrder(ctx, token.PublicAddress, param.OrderId, order, mask); err != nil {
 		utils.InternalServerError.Message = fmt.Sprintf("Operation failed, %s.", err.Error())
 		utils.Response(ctx, utils.SuccessCode, utils.InternalServerError, nil)
