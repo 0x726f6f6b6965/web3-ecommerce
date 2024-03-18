@@ -10,6 +10,7 @@ type AppConfig struct {
 	HttpPort uint64    `yaml:"http_port"`
 	Env      string    `yaml:"env"`
 	EthUrl   string    `yaml:"eth_url"`
+	Secret   string    `yaml:"secret"`
 	Owner    string    `yaml:"owner"`
 	Token    *Token    `yaml:"token"`
 	DB       *Dyanmodb `yaml:"db"`

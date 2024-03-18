@@ -5,13 +5,15 @@ import (
 )
 
 const (
-	Pk          string = "pk"
-	Sk          string = "sk"
-	SoftDeleted string = "soft_deleted"
+	Pk              string = "pk"
+	Sk              string = "sk"
+	SoftDeleted     string = "soft_deleted"
+	OrderStatusDate string = "order_status_date"
 
-	SoftDeletedIndex string = "soft_deleted_index"
-	PkNotExists      string = "attribute_not_exists(pk)"
-	PkExists         string = "attribute_exists(pk)"
+	SoftDeletedIndex  string = "soft_deleted_index"
+	FilterOrderStatus string = "filter_order_status"
+	PkNotExists       string = "attribute_not_exists(pk)"
+	PkExists          string = "attribute_exists(pk)"
 )
 
 var (

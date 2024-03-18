@@ -1,1 +1,4 @@
 cmd/app/.env
+docker/dynamodb/shared-local-instance.db
+deployment/owner
+deployment/secret

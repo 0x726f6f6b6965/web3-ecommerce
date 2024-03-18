@@ -1,0 +1,43 @@
+{
+  "TableName": "ECOMMERCE",
+  "KeySchema": [
+    { "AttributeName": "pk", "KeyType": "HASH" },
+    { "AttributeName": "sk", "KeyType": "RANGE" }
+  ],
+  "AttributeDefinitions": [
+    { "AttributeName": "pk", "AttributeType": "S" },
+    { "AttributeName": "sk", "AttributeType": "S" },
+    { "AttributeName": "order_status_date", "AttributeType": "S" },
+    { "AttributeName": "soft_deleted", "AttributeType": "N" }
+  ],
+  "GlobalSecondaryIndexes": [
+    {
+      "IndexName": "soft_deleted_index",
+      "KeySchema": [{ "AttributeName": "soft_deleted", "KeyType": "HASH" }],
+      "Projection": {
+        "NonKeyAttributes": ["item_id", "product_name", "picture"],
+        "ProjectionType": "INCLUDE"
+      },
+      "ProvisionedThroughput": {
+        "ReadCapacityUnits": 5,
+        "WriteCapacityUnits": 5
+      }
+    }
+  ],
+  "LocalSecondaryIndexes": [
+    {
+      "IndexName": "filter_order_status",
+      "KeySchema": [
+        { "AttributeName": "pk", "KeyType": "HASH" },
+        { "AttributeName": "order_status_date", "KeyType": "RANGE" }
+      ],
+      "Projection": {
+        "ProjectionType": "KEYS_ONLY"
+      }
+    }
+  ],
+  "ProvisionedThroughput": {
+    "ReadCapacityUnits": 5,
+    "WriteCapacityUnits": 5
+  }
+}

@@ -46,7 +46,19 @@ func main() {
 			log.Fatalf(fmt.Sprintf("Failed to create dynamo client: %s", err))
 		}
 	}
-	helper.JwtSecretKey = []byte(os.Getenv("JWT_SECRET_KEY"))
+
+	secret, err := os.ReadFile(os.Getenv(cfg.Secret))
+	if err != nil {
+		log.Fatal("read jwt secret error", err)
+		return
+	}
+	helper.JwtSecretKey = secret
+
+	owner, err := os.ReadFile(os.Getenv(cfg.Owner))
+	if err != nil {
+		log.Fatal("read jwt owner error", err)
+		return
+	}
 
 	prot := cfg.HttpPort
 	client, err := ethclient.Dial(cfg.EthUrl)
@@ -67,15 +79,15 @@ func main() {
 	api.NewPaymentApi(ercService, client)
 	api.NewUserApi(client)
 	cfg.HttpPort = prot
-	if err := startServer(cfg); err != nil {
+	if err := startServer(cfg, string(owner)); err != nil {
 		log.Fatalf(fmt.Sprintf("Failed to start server: %s", err))
 	}
 }
 
-func startServer(cfg *config.AppConfig) error {
+func startServer(cfg *config.AppConfig, owner string) error {
 	server := &http.Server{
 		Addr:    fmt.Sprintf(":%d", cfg.HttpPort),
-		Handler: initEngine(cfg),
+		Handler: initEngine(cfg, owner),
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 
@@ -96,7 +108,7 @@ func startServer(cfg *config.AppConfig) error {
 	return err
 }
 
-func initEngine(cfg *config.AppConfig) *gin.Engine {
+func initEngine(cfg *config.AppConfig, owner string) *gin.Engine {
 	gin.SetMode(func() string {
 		if cfg.IsDevEnv() {
 			return gin.DebugMode
@@ -111,7 +123,7 @@ func initEngine(cfg *config.AppConfig) *gin.Engine {
 			"msg":  "Service internal exception!",
 		})
 	}))
-	router.RegisterRoutes(engine, os.Getenv(cfg.Owner))
+	router.RegisterRoutes(engine, owner)
 	return engine
 }
 
