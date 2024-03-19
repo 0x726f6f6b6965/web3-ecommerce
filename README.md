@@ -32,10 +32,10 @@
 ## Endpoints
 
 ### Auth
-| #   | action    | method | header | endpoint       | body             | return    | done               |
-| --- | --------- | ------ | ------ | -------------- | ---------------- | --------- | ------------------ |
-| 1   | register  | POST   |        | /auth/register | user basic info  |           | :white_check_mark: |
-| 2   | get token | POST   |        | /auth/token    | email & password | jwt token | :white_check_mark: |
+| #   | action    | method | header | endpoint       | body            | return    | done               |
+| --- | --------- | ------ | ------ | -------------- | --------------- | --------- | ------------------ |
+| 1   | register  | POST   |        | /auth/register | user basic info |           | :white_check_mark: |
+| 2   | get token | POST   |        | /auth/token    | signature       | jwt token | :white_check_mark: |
 
 ### User
 | #   | action           | method | header    | endpoint   | body                    | return          | done               |

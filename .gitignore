@@ -1,4 +1,6 @@
-cmd/app/.env
+.env
 docker/dynamodb/shared-local-instance.db
 deployment/owner
 deployment/secret
+private_key
+to

@@ -15,7 +15,13 @@
       "IndexName": "soft_deleted_index",
       "KeySchema": [{ "AttributeName": "soft_deleted", "KeyType": "HASH" }],
       "Projection": {
-        "NonKeyAttributes": ["item_id", "product_name", "picture"],
+        "NonKeyAttributes": [
+          "soft_deleted",
+          "image",
+          "price",
+          "description",
+          "name"
+        ],
         "ProjectionType": "INCLUDE"
       },
       "ProvisionedThroughput": {

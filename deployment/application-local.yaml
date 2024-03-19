@@ -1,4 +1,4 @@
-http_port: 8088
+http_port: 8080
 env: "dev"
 eth_url: "wss://ethereum-sepolia-rpc.publicnode.com"
 owner: "ADMIN"
@@ -9,7 +9,7 @@ token:
   symbol: "USDC"
   decimals: 6
 db:
-  host: "localhost"
+  host: "dynamodb-local"
   port: 8000
   region: "us-east-1"
   table: "ECOMMERCE"
