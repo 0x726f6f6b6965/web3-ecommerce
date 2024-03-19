@@ -3,7 +3,6 @@ package services
 import (
 	"context"
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/0x726f6f6b6965/web3-ecommerce/internal/storage"
@@ -33,9 +32,7 @@ func (p *payment) PayToken(ctx context.Context, publicAddress, orderId string, n
 		return "", ErrDynamodbClientNotFound
 	}
 
-	order, err := model.GetOrder(ctx, dynamo,
-		fmt.Sprintf(storage.UserKey, publicAddress),
-		fmt.Sprintf(storage.OrderKey, orderId))
+	order, err := model.GetOrder(ctx, dynamo, publicAddress, orderId)
 
 	if err != nil {
 		return "", err
@@ -57,9 +54,7 @@ func (p *payment) PayToken(ctx context.Context, publicAddress, orderId string, n
 		order.Status = protos.StatusPending
 		order.PaymentHash = tx.Hash().Hex()
 		order.UpdatedAt = time.Now().Unix()
-		_, err = model.UpdateOrder(ctx, dynamo,
-			fmt.Sprintf(storage.UserKey, publicAddress),
-			fmt.Sprintf(storage.OrderKey, orderId),
+		_, err = model.UpdateOrder(ctx, dynamo, publicAddress, orderId,
 			*order, []string{"status", "payment_hash", "updated_at"})
 		if err != nil {
 			return "", errors.Join(ErrDynamodb, err)

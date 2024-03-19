@@ -137,7 +137,6 @@ func GetAllProducts(ctx context.Context, client *storage.DaoClient) ([]*protos.P
 			item.Id = strings.TrimPrefix(item.Id, fmt.Sprintf(storage.ProductKey, ""))
 			items = append(items, item)
 		}
-		items = append(items, itemPage...)
 	}
 	return items, err
 }

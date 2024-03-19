@@ -102,7 +102,7 @@ func GetOrder(ctx context.Context, client *storage.DaoClient, publicAddress stri
 	if response.Item == nil {
 		return order, nil
 	}
-	if err = attributevalue.UnmarshalMap(response.Item, &order); err != nil {
+	if err = attributevalue.UnmarshalMap(response.Item, order); err != nil {
 		return order, err
 	}
 	order.Id = strings.TrimPrefix(order.Id, fmt.Sprintf(storage.OrderKey, ""))
