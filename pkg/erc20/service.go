@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"math/big"
+	"strings"
 	"time"
 
 	"github.com/0x726f6f6b6965/web3-ecommerce/pkg/contract"
@@ -15,6 +16,7 @@ import (
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
 )
@@ -217,8 +219,17 @@ func (s *service) TransferWithSign(ctx context.Context, trans protos.CommonReque
 		return nil, ErrInvalidGasFeeCap
 	}
 	params.GasFeeCap = gasFee
+	var signature []byte
+	if strings.HasPrefix(trans.Signature, "0x") {
+		signature, err = hexutil.Decode(trans.Signature)
+		if err != nil {
+			return nil, errors.Join(ErrInvalidSignature, err)
+		}
+	} else {
+		signature = []byte(trans.Signature)
+	}
 
-	return s.transaction(ctx, trans.Nonce, *params, []byte(trans.Signature), nil)
+	return s.transaction(ctx, trans.Nonce, *params, signature, nil)
 }
 
 func (s *service) BalanceOf(ctx context.Context, address string) (*big.Int, error) {
@@ -497,11 +508,11 @@ func (s *service) GetABI() abi.ABI {
 }
 
 func (s *service) checkCommonRequest(request protos.CommonRequest, method string) ([]byte, error) {
-	if utils.IsEmpty(request.From) || utils.IsValidAddress(request.From) {
+	if utils.IsEmpty(request.From) || !utils.IsValidAddress(request.From) {
 		return nil, errors.Join(ErrInvalidAddress, fmt.Errorf("from address is invalid"))
 	}
 
-	if utils.IsEmpty(request.To) || utils.IsValidAddress(request.To) {
+	if utils.IsEmpty(request.To) || !utils.IsValidAddress(request.To) {
 		return nil, errors.Join(ErrInvalidAddress, fmt.Errorf("to address is invalid"))
 	}
 	to := common.HexToAddress(request.To)
@@ -511,7 +522,7 @@ func (s *service) checkCommonRequest(request protos.CommonRequest, method string
 	}
 	amount := contract.ToWei(request.Amount, 6)
 
-	if request.Nonce <= 0 {
+	if request.Nonce < 0 {
 		return nil, ErrInvalidNonce
 	}
 
@@ -524,7 +535,6 @@ func (s *service) checkCommonRequest(request protos.CommonRequest, method string
 
 func (s *service) transaction(ctx context.Context, nonce uint64, callParams ethereum.CallMsg, sign []byte, privateKey *ecdsa.PrivateKey) (*types.Transaction, error) {
 	tx := types.NewTx(&types.DynamicFeeTx{
-		ChainID:   s.chainId,
 		Nonce:     nonce,
 		GasTipCap: callParams.GasTipCap,
 		GasFeeCap: callParams.GasFeeCap,
