@@ -57,6 +57,8 @@ func (p *payment) PayToken(ctx context.Context, publicAddress, orderId string, n
 		_, err = model.UpdateOrder(ctx, dynamo, publicAddress, orderId,
 			*order, []string{"status", "payment_hash", "updated_at"})
 		if err != nil {
+			// because transaction already done
+			// here need to keep the error and update the order
 			return "", errors.Join(ErrDynamodb, err)
 		}
 		return tx.Hash().Hex(), nil

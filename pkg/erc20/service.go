@@ -522,10 +522,6 @@ func (s *service) checkCommonRequest(request protos.CommonRequest, method string
 	}
 	amount := contract.ToWei(request.Amount, 6)
 
-	if request.Nonce < 0 {
-		return nil, ErrInvalidNonce
-	}
-
 	input, err := s.contract.ABI.Pack(method, to, amount)
 	if err != nil {
 		return nil, errors.Join(ErrContractPack, err)
