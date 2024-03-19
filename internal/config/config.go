@@ -22,6 +22,8 @@ type Token struct {
 	Decimals int    `yaml:"decimals"`
 }
 type Dyanmodb struct {
+	Host   string `yaml:"host"`
+	Port   uint64 `yaml:"port"`
 	Region string `yaml:"region"`
 	Table  string `yaml:"table"`
 }

@@ -40,7 +40,7 @@ func main() {
 		return
 	}
 	if cfg.IsDevEnv() {
-		storage.NewDevLocalClient(cfg.DB.Table)
+		storage.NewDevLocalClient(cfg.DB.Table, cfg.DB.Host, cfg.DB.Port)
 	} else {
 		if err := storage.NewDynamoClient(context.Background(), cfg.DB.Region, cfg.DB.Table); err != nil {
 			log.Fatalf(fmt.Sprintf("Failed to create dynamo client: %s", err))

@@ -2,6 +2,7 @@ package storage
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/0x726f6f6b6965/web3-ecommerce/pkg/once"
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -39,12 +40,12 @@ func NewDynamoClient(ctx context.Context, region, table string) error {
 	return err
 }
 
-func NewDevLocalClient(table string) error {
+func NewDevLocalClient(table string, host string, port uint64) error {
 	cfg, _ := config.LoadDefaultConfig(context.TODO(),
 		config.WithRegion("us-east-1"),
 		config.WithEndpointResolverWithOptions(aws.EndpointResolverWithOptionsFunc(
 			func(service, region string, options ...interface{}) (aws.Endpoint, error) {
-				return aws.Endpoint{URL: "http://localhost:8000"}, nil
+				return aws.Endpoint{URL: fmt.Sprintf("http://%s:%d", host, port)}, nil
 			})),
 		config.WithCredentialsProvider(credentials.StaticCredentialsProvider{
 			Value: aws.Credentials{
