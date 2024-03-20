@@ -15,6 +15,7 @@ service-down:
 .PHONY: generate-image
 generate-image:
 	@docker build --tag web3-ecommerce:$(shell git rev-parse HEAD) -f ./build/Dockerfile .
+	# @docker build --tag web3-monitor:$(shell git rev-parse HEAD) -f ./build/Dockerfile.lambda.monitor-trans .
 
 .PHONY: dynamodb-up
 dynamodb-up:

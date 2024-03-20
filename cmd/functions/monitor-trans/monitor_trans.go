@@ -4,21 +4,33 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"os"
 	"time"
 
 	"github.com/0x726f6f6b6965/web3-ecommerce/internal/monitor"
 	"github.com/0x726f6f6b6965/web3-ecommerce/protos"
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/joho/godotenv"
 )
 
 var (
-	ether *ethclient.Client
+	Ether *ethclient.Client
 	db    *dynamodb.Client
 )
-var TimeOut = time.Minute * 3
+var (
+	TimeOut               = time.Minute * 3
+	ErrInvalidEvent error = errors.New("invalid event")
+	ErrUnmarshal    error = errors.New("unmarshal error")
+	ErrTimeout      error = errors.New("timeout")
+	ErrMonitor      error = errors.New("monitor error")
+	ErrUpdateTrans  error = errors.New("update transaction error")
+)
 
 func Handler(ctx context.Context, sqsEvent events.SQSEvent) error {
 	if len(sqsEvent.Records) < 1 {
@@ -30,7 +42,7 @@ func Handler(ctx context.Context, sqsEvent events.SQSEvent) error {
 		return errors.Join(ErrUnmarshal, err)
 	}
 
-	data, stop, errChan := monitor.Monitor(ether, request)
+	data, stop, errChan := monitor.Monitor(Ether, request)
 	ctx, cancel := context.WithTimeout(ctx, TimeOut)
 	defer cancel()
 
@@ -67,5 +79,29 @@ func Handler(ctx context.Context, sqsEvent events.SQSEvent) error {
 	}
 }
 func main() {
+	godotenv.Load()
+	client, err := ethclient.Dial(os.Getenv("RPC"))
+	if err != nil {
+		panic(err)
+	}
+	Ether = client
+	var cfg aws.Config
+	if os.Getenv("ENV") == "dev" {
+		cfg, _ = config.LoadDefaultConfig(context.TODO(),
+			config.WithRegion("us-east-1"),
+			config.WithEndpointResolverWithOptions(aws.EndpointResolverWithOptionsFunc(
+				func(service, region string, options ...interface{}) (aws.Endpoint, error) {
+					return aws.Endpoint{URL: fmt.Sprintf("http://%s:%s", os.Getenv("HOST"), os.Getenv("PORT"))}, nil
+				})))
+	} else {
+		cfg, err = config.LoadDefaultConfig(context.Background(),
+			config.WithRegion(os.Getenv("REGION")),
+		)
+		if err != nil {
+			panic(err)
+		}
+	}
+	db = dynamodb.NewFromConfig(cfg)
+
 	lambda.Start(Handler)
 }

@@ -20,9 +20,9 @@ type paymentApi struct {
 	client *ethclient.Client
 }
 
-func NewPaymentApi(serv erc20.ERC20Service, ethClient *ethclient.Client, sqs *client.SQSClient) *paymentApi {
+func NewPaymentApi(serv erc20.ERC20Service, ethClient *ethclient.Client, sqs *client.SQSClient, contract string) *paymentApi {
 	PaymentApi = &paymentApi{
-		srv:    services.NewPaymentService(serv, ethClient, sqs),
+		srv:    services.NewPaymentService(serv, ethClient, sqs, contract),
 		client: ethClient,
 	}
 	return PaymentApi

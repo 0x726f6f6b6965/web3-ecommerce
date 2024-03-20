@@ -25,13 +25,15 @@ type payment struct {
 	token     erc20.ERC20Service
 	sqsClient *client.SQSClient
 	ether     *ethclient.Client
+	contract  string
 }
 
-func NewPaymentService(token erc20.ERC20Service, ethClient *ethclient.Client, sqs *client.SQSClient) PaymentService {
+func NewPaymentService(token erc20.ERC20Service, ethClient *ethclient.Client, sqs *client.SQSClient, contract string) PaymentService {
 	return &payment{
 		token:     token,
 		ether:     ethClient,
 		sqsClient: sqs,
+		contract:  contract,
 	}
 }
 
@@ -80,7 +82,7 @@ func (p *payment) PayToken(ctx context.Context, publicAddress, orderId string, n
 		sqsData := new(protos.CreateMonitorRequest)
 		sqsData.OrderId = orderId
 		sqsData.TxHash = tx.Hash().Hex()
-		sqsData.Contract = ""
+		sqsData.Contract = p.contract
 		sqsData.From = publicAddress
 		sqsData.FromBlock = block.NumberU64() - rollback
 		err = client.Send(ctx, p.sqsClient, sqsData)

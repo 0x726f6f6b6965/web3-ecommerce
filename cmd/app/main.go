@@ -84,7 +84,7 @@ func main() {
 
 	api.NewProductApi(time.Minute * 10)
 	api.NewOrderApi()
-	api.NewPaymentApi(ercService, ethClient, sqsClient)
+	api.NewPaymentApi(ercService, ethClient, sqsClient, cfg.Token.Address)
 	api.NewUserApi(ethClient)
 	cfg.HttpPort = prot
 	if err := startServer(cfg, string(owner)); err != nil {

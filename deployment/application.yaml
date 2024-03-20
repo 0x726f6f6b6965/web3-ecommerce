@@ -13,3 +13,8 @@ db:
   port: 8000
   region: "us-east-1"
   table: "ECOMMERCE"
+sqs:
+  host: "localhost"
+  port: 9324
+  region: "us-east-1"
+  url: "http://localhost:9324/queue/queue1"
