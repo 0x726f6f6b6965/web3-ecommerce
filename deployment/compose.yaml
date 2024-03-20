@@ -21,3 +21,10 @@ services:
       - ./deployment/abi/erc-20.json:/app/erc-20.json
       - ./deployment/owner:/app/owner
       - ./deployment/secret:/app/secret
+  sqs-local:
+    image: "softwaremill/elasticmq-native"
+    ports:
+      - "9324:9324"
+      - "9325:9325"
+    volumes:
+      - ./deployment/sqs/custom.conf:/opt/elasticmq.conf

@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/0x726f6f6b6965/web3-ecommerce/internal/api/services"
+	"github.com/0x726f6f6b6965/web3-ecommerce/internal/client"
 	"github.com/0x726f6f6b6965/web3-ecommerce/pkg/erc20"
 	"github.com/0x726f6f6b6965/web3-ecommerce/protos"
 	"github.com/0x726f6f6b6965/web3-ecommerce/utils"
@@ -19,10 +20,10 @@ type paymentApi struct {
 	client *ethclient.Client
 }
 
-func NewPaymentApi(serv erc20.ERC20Service, client *ethclient.Client) *paymentApi {
+func NewPaymentApi(serv erc20.ERC20Service, ethClient *ethclient.Client, sqs *client.SQSClient) *paymentApi {
 	PaymentApi = &paymentApi{
-		srv:    services.NewPaymentService(serv, client),
-		client: client,
+		srv:    services.NewPaymentService(serv, ethClient, sqs),
+		client: ethClient,
 	}
 	return PaymentApi
 }

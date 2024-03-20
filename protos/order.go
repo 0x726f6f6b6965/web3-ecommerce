@@ -33,6 +33,7 @@ const (
 	StatusShipped
 	StatusDelivered
 	StatusCancelled
+	StatusMonitorFailed
 )
 
 func (s Status) String() string {
@@ -51,6 +52,8 @@ func (s Status) String() string {
 		return "delivered"
 	case StatusCancelled:
 		return "cancelled"
+	case StatusMonitorFailed:
+		return "monitor_failed"
 	default:
 		return "unknow"
 	}

@@ -14,6 +14,7 @@ type AppConfig struct {
 	Owner    string    `yaml:"owner"`
 	Token    *Token    `yaml:"token"`
 	DB       *Dyanmodb `yaml:"db"`
+	SQS      *SQS      `yaml:"sqs"`
 }
 type Token struct {
 	FilePath string `yaml:"file_path"`
@@ -26,6 +27,13 @@ type Dyanmodb struct {
 	Port   uint64 `yaml:"port"`
 	Region string `yaml:"region"`
 	Table  string `yaml:"table"`
+}
+
+type SQS struct {
+	Host   string `yaml:"host"`
+	Port   uint64 `yaml:"port"`
+	Region string `yaml:"region"`
+	URL    string `yaml:"url"`
 }
 
 func (cfg *AppConfig) IsDevEnv() bool {

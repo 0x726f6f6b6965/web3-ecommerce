@@ -13,6 +13,7 @@ import (
 
 	"github.com/0x726f6f6b6965/web3-ecommerce/internal/api"
 	"github.com/0x726f6f6b6965/web3-ecommerce/internal/api/router"
+	"github.com/0x726f6f6b6965/web3-ecommerce/internal/client"
 	"github.com/0x726f6f6b6965/web3-ecommerce/internal/config"
 	"github.com/0x726f6f6b6965/web3-ecommerce/internal/helper"
 	"github.com/0x726f6f6b6965/web3-ecommerce/internal/storage"
@@ -39,11 +40,17 @@ func main() {
 		log.Fatal("unmarshal yaml error", err)
 		return
 	}
+	var sqsClient *client.SQSClient
 	if cfg.IsDevEnv() {
 		storage.NewDevLocalClient(cfg.DB.Table, cfg.DB.Host, cfg.DB.Port)
+		sqsClient = client.NewDevSQSClient(cfg.SQS.URL, cfg.SQS.Host, cfg.SQS.Port)
 	} else {
 		if err := storage.NewDynamoClient(context.Background(), cfg.DB.Region, cfg.DB.Table); err != nil {
 			log.Fatalf(fmt.Sprintf("Failed to create dynamo client: %s", err))
+		}
+		sqsClient, err = client.NewSQSClient(context.Background(), cfg.SQS.Region, cfg.SQS.URL)
+		if err != nil {
+			log.Fatalf(fmt.Sprintf("Failed to create sqs client: %s", err))
 		}
 	}
 
@@ -61,7 +68,7 @@ func main() {
 	}
 
 	prot := cfg.HttpPort
-	client, err := ethclient.Dial(cfg.EthUrl)
+	ethClient, err := ethclient.Dial(cfg.EthUrl)
 	if err != nil {
 		log.Fatalf(fmt.Sprintf("Failed to connect ethereum: %s", err))
 	}
@@ -69,15 +76,16 @@ func main() {
 	if err != nil {
 		log.Fatalf(fmt.Sprintf("Failed to create contract: %s", err))
 	}
-	chainId, err := client.ChainID(context.Background())
+	chainId, err := ethClient.ChainID(context.Background())
 	if err != nil {
 		log.Fatalf(fmt.Sprintf("Failed to get chain id: %s", err))
 	}
-	ercService := erc20.NewERC20Service(client, token, chainId, cfg.Token.Decimals)
+	ercService := erc20.NewERC20Service(ethClient, token, chainId, cfg.Token.Decimals)
+
 	api.NewProductApi(time.Minute * 10)
 	api.NewOrderApi()
-	api.NewPaymentApi(ercService, client)
-	api.NewUserApi(client)
+	api.NewPaymentApi(ercService, ethClient, sqsClient)
+	api.NewUserApi(ethClient)
 	cfg.HttpPort = prot
 	if err := startServer(cfg, string(owner)); err != nil {
 		log.Fatalf(fmt.Sprintf("Failed to start server: %s", err))

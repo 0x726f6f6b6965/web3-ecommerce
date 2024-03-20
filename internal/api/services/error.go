@@ -10,4 +10,6 @@ var (
 	ErrDynamodb               = errors.New("dynamodb operation failed")
 	ErrInvalidSignature       = errors.New("invalid signature")
 	ErrGenerateToken          = errors.New("generate token failed")
+	ErrSQS                    = errors.New("sqs operation failed")
+	ErrEthereum               = errors.New("ethereum operation failed")
 )

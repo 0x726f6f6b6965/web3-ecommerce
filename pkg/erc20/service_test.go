@@ -49,7 +49,7 @@ func TestTransferWithSign(t *testing.T) {
 	if err != nil {
 		t.Fatal(errors.Join(errors.New("to address not found"), err))
 	}
-	to := common.BytesToAddress(toByte)
+	to := common.HexToAddress(string(toByte))
 	nonce, err := client.PendingNonceAt(ctx, from)
 	if err != nil {
 		t.Fatal(errors.Join(errors.New("get nonce error"), err))
@@ -101,7 +101,6 @@ func TestTransferWithSign(t *testing.T) {
 	}
 
 	tx := types.NewTx(&types.DynamicFeeTx{
-		ChainID:   chain,
 		Nonce:     nonce,
 		GasTipCap: params.GasTipCap,
 		GasFeeCap: params.GasFeeCap,

@@ -1,5 +1,8 @@
 # E-commerce
 
+## Basic Architecture Design
+![architecture](./pic/architecture.png)
+
 ## Entity Relationship Diagram
 ![entity relationship diagram](./erd/e-commerce.png)
 
